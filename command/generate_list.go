@@ -4,10 +4,12 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"errors"
+	"flag"
 	"go-cli/structs"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 type GenerateListCommand struct {
 	Ui       cli.Ui
 	FileName string
+	Path     string
 }
 
 // Shows the commands help in the UI.
@@ -26,6 +29,17 @@ Usage: go-cli generate list [options]
 
   This command generates a csv file based on the
   iTunes API top 100 list.
+
+  General Options:
+
+  -filename=<string>
+	Sets the file name for the generated csv. The extension
+	will be added at runtime.
+	Example: kung-fu
+	
+  -Path=<string>
+	Sets the path for where the generated csv will be placed.
+	Example: ~/some/path/
 `
 	return strings.TrimSpace(helpText)
 }
@@ -38,6 +52,28 @@ func (gl *GenerateListCommand) Synopsis() string {
 // Run calls the iTunes api and generates a csv
 // based on the data from the reponse.
 func (gl *GenerateListCommand) Run(args []string) int {
+
+	fs := flag.NewFlagSet("list general options", flag.ContinueOnError)
+	fs.StringVar(&gl.FileName, "filename", "", "Sets the filename for the generated csv.")
+	fs.StringVar(&gl.Path, "path", "", "Sets the path for where the generated csv will be placed.")
+	fs.Parse(args)
+
+	if gl.Path != "" {
+		gl.Path = path.Clean(gl.Path)
+
+		stat, statErr := os.Stat(gl.Path)
+		if gl.hasError(statErr, false) {
+			gl.Ui.Error("Could not read path info:")
+			gl.Ui.Error(statErr.Error())
+			return 1
+		}
+
+		if stat.IsDir() == false {
+			gl.Ui.Error("The provided path is not a directory")
+			return 1
+		}
+	}
+
 	gl.Ui.Info("Running generate list command:")
 	gl.Ui.Info("Calling iTunes API...")
 
@@ -103,8 +139,12 @@ func (gl *GenerateListCommand) parseJSON(data []byte, v interface{}) error {
 // Generates a csv file based on the JSON data.
 func (gl *GenerateListCommand) generateCSV(jsonData structs.ApiResponse) error {
 
-	filePtr, err := os.Create(time.Now().UTC().Format("20060102150405") + ".csv")
-	// filePtr, err := os.Create(strconv.FormatInt(time.Now().UTC().UnixNano(), 10) + ".csv")
+	if gl.FileName == "" {
+		gl.FileName = time.Now().UTC().Format("20060102150405")
+	}
+
+	// Need to clean the path here in case we're running on windows.
+	filePtr, err := os.Create(path.Clean(gl.Path + "/" + gl.FileName + ".csv"))
 	defer filePtr.Close()
 
 	if gl.hasError(err, false) {

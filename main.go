@@ -25,7 +25,7 @@ func Run(args []string) int {
 
 	cli := &cli.CLI{
 		Name:     "go-cli",
-		Version:  "0.1.0",
+		Version:  "0.1.1",
 		Args:     args,
 		Commands: commands,
 	}
