@@ -25,6 +25,11 @@ func Commands(commandUI cli.Ui) map[string]cli.CommandFactory {
 				Ui: coloredUI,
 			}, nil
 		},
+		"transfer": func() (cli.Command, error) {
+			return &TransferCommand{
+				Ui: coloredUI,
+			}, nil
+		},
 	}
 
 	return all
