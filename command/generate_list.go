@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"go-cli/structs"
 	"io/ioutil"
 	"net/http"
@@ -37,7 +38,7 @@ Usage: go-cli generate list [options]
 	will be added at runtime.
 	Example: kung-fu
 	
-  -Path=<string>
+  -path=<string>
 	Sets the path for where the generated csv will be placed.
 	Example: ~/some/path/
 `
@@ -143,9 +144,18 @@ func (gl *GenerateListCommand) generateCSV(jsonData structs.ApiResponse) error {
 		gl.FileName = time.Now().UTC().Format("20060102150405")
 	}
 
+	// Re-add the path ending slash
+	if gl.Path != "" {
+		gl.Path = gl.Path + "/"
+	}
+
 	// Need to clean the path here in case we're running on windows.
-	filePtr, err := os.Create(path.Clean(gl.Path + "/" + gl.FileName + ".csv"))
+	filePath := path.Clean(gl.Path + gl.FileName + ".csv")
+
+	filePtr, err := os.Create(filePath)
 	defer filePtr.Close()
+
+	gl.Ui.Warn(fmt.Sprintf("Generated file: %s", filePath))
 
 	if gl.hasError(err, false) {
 		gl.Ui.Error("Could not create csv file:")
