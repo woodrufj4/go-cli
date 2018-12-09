@@ -37,7 +37,7 @@ Usage: go-cli generate list [options]
 	will be added at runtime.
 	Example: kung-fu
 	
-  -Path=<string>
+  -path=<string>
 	Sets the path for where the generated csv will be placed.
 	Example: ~/some/path/
 `
