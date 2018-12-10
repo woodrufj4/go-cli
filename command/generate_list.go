@@ -78,7 +78,7 @@ func (gl *GenerateListCommand) Run(args []string) int {
 	gl.Ui.Info("Running generate list command:")
 	gl.Ui.Info("Calling iTunes API...")
 
-	resp, err := http.Get("https://itunes.apple.com/us/rss/topalbums/limit=100/json")
+	resp, err := http.Get(API_URL)
 
 	if gl.hasError(err, true) {
 		return 1
