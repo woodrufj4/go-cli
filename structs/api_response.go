@@ -17,6 +17,8 @@ type Entry struct {
 		Label string `json:"label"`
 	} `json:"im:name"`
 
+	Images []Image `json:"im:image"`
+
 	Artist struct {
 		Label string `json:"label"`
 	} `json:"im:artist"`
@@ -42,4 +44,11 @@ type Entry struct {
 	ReleaseDate struct {
 		Label string `json:"label"`
 	} `json:"im:releaseDate"`
+}
+
+type Image struct {
+	Label      string `json:"label"`
+	Attributes struct {
+		Height string `json:"height"`
+	} `json:"attributes"`
 }
